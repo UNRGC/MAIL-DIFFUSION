@@ -18,8 +18,13 @@ connectDB();
 // Configurar Express para que pueda parsear JSON
 app.use(express.json({ limit: "15mb" }));
 
-// Configurar CORS
-app.use(cors());
+// Configuración CORS
+const corsOptions = {
+    origin: "http://localhost:3000",
+    methods: "GET,POST,PUT,DELETE",
+    allowedHeaders: "Content-Type,Authorization",
+};
+app.use(cors(corsOptions));
 
 // Middleware para manejar errores de JSON mal formados
 app.use((err, req, res, next) => {

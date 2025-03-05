@@ -2,23 +2,25 @@
     "type": "module",
     "name": "mail-diffusion",
     "version": "1.0.0",
+    "description": "Aplicación de escritorio para enviar correos masivos desde el directorio de clientes de CONTPAQi® Comercial Premium",
     "main": "src/main.js",
-    "scripts": {
-        "test": "echo \"Error: no test specified\" && exit 1",
-        "start": "electron ."
-    },
-    "keywords": [],
     "author": "Ulises Noriega",
     "license": "ISC",
-    "description": "",
+    "scripts": {
+        "start": "electron .",
+        "package": "electron-packager . OmniMail --platform=win32 --arch=x64 --out=dist --overwrite --asar --icon=assets/icon.ico"
+    },
     "dependencies": {
         "body-parser": "^1.20.3",
         "cors": "^2.8.5",
         "dotenv": "^16.4.7",
         "dotenv-expand": "^12.0.1",
-        "electron": "^34.2.0",
         "express": "^4.21.2",
         "mssql": "^11.0.1",
         "nodemailer": "^6.10.0"
+    },
+    "devDependencies": {
+        "electron": "^34.2.0",
+        "electron-packager": "^17.1.2"
     }
 }
