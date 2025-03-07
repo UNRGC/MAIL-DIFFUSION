@@ -33,6 +33,7 @@ const clearBtn = document.getElementById("clear");
 
 const formDiffusion = document.getElementById("formDiffusion");
 const affairInput = document.getElementById("affair");
+const colorInput = document.getElementById("color");
 const messageInput = document.getElementById("message");
 const templateSelect = document.getElementById("template");
 const imageInput = document.getElementById("imageInput");
@@ -61,34 +62,30 @@ const hashChange = () => {
     diffusionSection.classList.add("hidden");
     resultSection.classList.add("hidden");
 
-    discardBtn.disabled = true;
-    advancedBtn.disabled = true;
-    saveBtn.disabled = true;
+    discardBtn.click();
 
     // Muestra la sección correspondiente según el hash
-    if (estado === "listo") {
-        if (hash === "#connection") {
-            connectionBtn.classList.add("active");
-            connectionSection.classList.remove("hidden");
-        } else if (hash === "#console") {
-            consoleBtn.classList.add("active");
-            consoleSection.classList.remove("hidden");
-        } else if (hash === "#diffusion") {
-            diffusionBtn.classList.add("active");
-            diffusionSection.classList.remove("hidden");
-        } else if (hash === "#result") {
-            diffusionBtn.classList.add("active");
-            resultSection.classList.remove("hidden");
-        } else if (hash === "#exit") window.close();
-    } else {
+    if (hash === "#connection") {
+        connectionBtn.classList.add("active");
+        connectionSection.classList.remove("hidden");
+    } else if (hash === "#console") {
+        consoleBtn.classList.add("active");
+        consoleSection.classList.remove("hidden");
+    } else if (hash === "#diffusion" && estado === "listo") {
+        diffusionBtn.classList.add("active");
+        diffusionSection.classList.remove("hidden");
+    } else if (hash === "#diffusion" && estado === "enviando") {
+        window.location.hash = "result";
+    } else if (hash === "#result") {
         diffusionBtn.classList.add("active");
         resultSection.classList.remove("hidden");
-        document.body.classList.add("wait");
-    }
+    } else if (hash === "#exit") window.close();
 };
 
 // Función para cargar la configuración de conexión en los campos del formulario
 const loadConnection = async () => {
+    if (sessionStorage.getItem("connection") === true) return;
+
     const envVariables = await getConnection();
 
     instanceInput.value = envVariables.DB_SERVER;
@@ -102,6 +99,7 @@ const loadConnection = async () => {
     if (envVariables.USER_EMAIL !== "") passwordInput.placeholder = "••••••••";
     hostInput.value = envVariables.SERVER_EMAIL;
     organizationInput.value = envVariables.ORGANIZATION;
+    sessionStorage.setItem("connection", "true");
 };
 
 const loadTemplates = async () => {
@@ -143,10 +141,8 @@ formConnection.addEventListener("submit", async (event) => {
             window.location.hash = "console";
         } else {
             window.location.hash = "console";
-            // ipcRenderer.send("api-input", response.message);
         }
     } catch (error) {
-        // ipcRenderer.send("api-input", error.message);
         console.debug(error);
     }
 });
@@ -154,9 +150,11 @@ formConnection.addEventListener("submit", async (event) => {
 // Manejar el envío del formulario de difusión
 formDiffusion.addEventListener("submit", async (event) => {
     event.preventDefault();
+    document.body.classList.add("wait");
 
     const formData = {
         affair: affairInput.value,
+        color: colorInput.value,
         message: messageInput.value,
         template: templateSelect.value,
         image: preview.src,
@@ -194,8 +192,19 @@ formDiffusion.addEventListener("submit", async (event) => {
                 tbody.appendChild(tr);
             }
         });
+
+        const tr = document.createElement("tr");
+        const td1 = document.createElement("td");
+        td1.textContent = organizationInput.value;
+        const td2 = document.createElement("td");
+        td2.textContent = emailInput.value;
+        const td3 = document.createElement("td");
+        td3.textContent = "Enviando...";
+        tr.appendChild(td1);
+        tr.appendChild(td2);
+        tr.appendChild(td3);
+        tbody.appendChild(tr);
     } catch (error) {
-        // ipcRenderer.send("api-input", error.message);
         window.location.hash = "console";
         estado = "listo";
         return;
@@ -210,6 +219,7 @@ formDiffusion.addEventListener("submit", async (event) => {
             const data = {
                 addressee: emails,
                 affair: formData.affair,
+                color: formData.color,
                 message: formData.message,
                 template: formData.template,
                 image: formData.image,
@@ -221,7 +231,6 @@ formDiffusion.addEventListener("submit", async (event) => {
                     else status.textContent = "Error";
                 });
             } catch (error) {
-                // ipcRenderer.send("api-input", error.message);
                 status.textContent = "Error";
             }
         })
@@ -296,9 +305,7 @@ cancelBtn.addEventListener("click", () => {
 // Manejar el clic en el botón de retorno
 returnBtn.addEventListener("click", () => {
     estado = "listo";
-    formDiffusion.reset();
-    preview.src = "src/img/placeholder.png";
-    preview.style.height = "46px";
+    cancelBtn.click();
     window.location.hash = "diffusion";
     returnBtn.disabled = true;
 });
@@ -331,7 +338,3 @@ hashChange();
 // Cargar la configuración de conexión y los archivos HTML
 loadConnection();
 loadTemplates();
-
-// document.addEventListener("DOMContentLoaded", (event) => {
-//    console.log("DOM fully loaded and parsed");
-// });

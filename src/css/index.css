@@ -162,6 +162,12 @@ input:-webkit-autofill {
     -webkit-box-shadow: 0 0 0px 500px #2c2c2c inset !important;
     -webkit-text-fill-color: #ffd700 !important;
 }
+input[type="color"] {
+    height: 100%;
+    border-radius: 10px;
+    padding: 8px;
+    cursor: pointer;
+}
 
 /* Estilos de los correos */
 .result {
@@ -257,6 +263,10 @@ button:disabled {
     display: flex;
     gap: 16px;
     justify-content: center;
+    align-items: center;
+}
+.input-group:has(input[type="color"]) {
+    margin-top: 3px;
 }
 .version {
     text-align: center;

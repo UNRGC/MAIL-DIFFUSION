@@ -14,7 +14,7 @@ const __dirname = path.dirname(__filename);
 export const sendMailHandler = async (req, res) => {
     try {
         // Extrae los datos del cuerpo de la solicitud
-        const { addressee, affair, message, template, image } = req.body;
+        const { addressee, affair, color, message, template, image } = req.body;
 
         // Construye la ruta al archivo de plantilla HTML
         const templatePath = path.join(__dirname, "../templates", template);
@@ -26,6 +26,7 @@ export const sendMailHandler = async (req, res) => {
 
         // Reemplazos a realizar en el contenido HTML
         const replacements = {
+            _color: color,
             _affair: affair,
             _message: message,
         };

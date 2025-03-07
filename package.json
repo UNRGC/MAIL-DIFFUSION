@@ -7,7 +7,7 @@
     "author": "Ulises Noriega",
     "scripts": {
         "start": "electron .",
-        "package-win": "electron-packager . 'OmniMail' --platform=win32 --arch=x64 --icon=assets/icon.ico --out=dist --overwrite --ignore=\"\\.vscode|\\.env|\\.gitignore|\\package-lock.json\"",
+        "package-win": "electron-packager . OmniMail --platform=win32 --arch=x64 --icon=assets/icon.ico --out=dist --overwrite --ignore=\"\\.vscode|\\.env|\\.gitignore|\\package-lock.json\"",
         "build": "electron-builder"
     },
     "build": {

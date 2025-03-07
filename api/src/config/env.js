@@ -13,13 +13,13 @@ export const newEnv = () => {
         // Verifica si el archivo .env no existe
         // Contenido predeterminado para el archivo .env
         const envContent = `DB_SERVER=
-DB_USER=sa
+DB_USER=
 DB_PASSWORD=
-DB_NAME=adMercasoft
+DB_NAME=
 USER_EMAIL=
 PASSWORD_EMAIL=
-SERVER_EMAIL=smtp.simercasoft.com.mx
-ORGANIZATION=Soluciones Integrales Mercasoft`;
+SERVER_EMAIL=
+ORGANIZATION=`;
 
         // Escribe el contenido predeterminado en el archivo .env
         writeFileSync(envFilePath, envContent, "utf8");
