@@ -1,22 +1,27 @@
 import express from "express";
 import cors from "cors";
-import envRoutes from "./routes/envRoutes.js";
-import emailRouter from "./routes/emailRoutes.js";
-import { connectDB } from "./config/db.js";
+import envRoutes from "./src/routes/envRoutes.js";
+import emailRoutes from "./src/routes/emailRoutes.js";
+import templateRoutes from "./src/routes/templateRoutes.js";
+import { connectDB } from "./src/config/db.js";
 import os from "os";
-import { envNew } from "./config/env.js";
+import { newEnv } from "./src/config/env.js";
+import { newTemplate } from "./src/config/template.js";
 
 // Crear la aplicación Express
 const app = express();
 
 // Crear las variables de entorno
-envNew();
+newEnv();
+
+// Crea la primer plantilla
+newTemplate();
 
 // Conectar a la base de datos
-connectDB();
+await connectDB();
 
 // Configurar Express para que pueda parsear JSON
-app.use(express.json({ limit: "15mb" }));
+app.use(express.json({ limit: "25mb" }));
 
 // Configuración CORS
 const corsOptions = {
@@ -38,7 +43,8 @@ app.use((err, req, res, next) => {
 
 // Rutas
 app.use("/env", envRoutes);
-app.use("/email", emailRouter);
+app.use("/email", emailRoutes);
+app.use("/template", templateRoutes);
 
 // Obtener la dirección IP de la máquina
 const getIPAddress = () => {

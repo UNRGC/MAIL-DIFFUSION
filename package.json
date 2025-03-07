@@ -3,15 +3,31 @@
     "name": "mail-diffusion",
     "version": "1.0.0",
     "description": "Aplicación de escritorio para enviar correos masivos desde el directorio de clientes de CONTPAQi® Comercial Premium",
-    "main": "src/main.js",
+    "main": "main.js",
     "author": "Ulises Noriega",
-    "license": "ISC",
     "scripts": {
         "start": "electron .",
-        "package": "electron-packager . OmniMail --platform=win32 --arch=x64 --out=dist --overwrite --asar --icon=assets/icon.ico"
+        "package-win": "electron-packager . 'OmniMail' --platform=win32 --arch=x64 --icon=assets/icon.ico --out=dist --overwrite --ignore=\"\\.vscode|\\.env|\\.gitignore|\\package-lock.json\"",
+        "build": "electron-builder"
+    },
+    "build": {
+        "productName": "OmniMail",
+        "icon": "assets/icon.png",
+        "files": [
+            "dist/**/*",
+            "src/**/*",
+            "package.json"
+        ],
+        "appId": "com.omnimail.app",
+        "directories": {
+            "output": "dist"
+        },
+        "win": {
+            "target": "nsis",
+            "icon": "assets/icon.ico"
+        }
     },
     "dependencies": {
-        "body-parser": "^1.20.3",
         "cors": "^2.8.5",
         "dotenv": "^16.4.7",
         "dotenv-expand": "^12.0.1",
@@ -20,7 +36,7 @@
         "nodemailer": "^6.10.0"
     },
     "devDependencies": {
-        "electron": "^34.2.0",
+        "electron": "^35.0.0",
         "electron-packager": "^17.1.2"
     }
 }

@@ -4,6 +4,11 @@ import { config } from "dotenv";
 import { createTransport } from "nodemailer";
 // Importa el módulo fs para trabajar con el sistema de archivos
 import fs from "fs";
+import path from "path";
+import { fileURLToPath } from "url";
+
+const __filename = fileURLToPath(import.meta.url);
+const __dirname = path.dirname(__filename);
 
 // Carga las variables de entorno desde el archivo .env
 config();
@@ -27,7 +32,7 @@ const sendMail = async (addressee, affair, htmlBody, image) => {
     // Decodificar Base64 y guardarlo temporalmente
     const base64Data = image.replace(/^data:image\/\w+;base64,/, ""); // Elimina el prefijo de la cadena Base64
     const buffer = Buffer.from(base64Data, "base64"); // Convierte la cadena Base64 en un buffer
-    const filePath = "src/uploads/temp_image.jpg"; // Ruta del archivo temporal
+    const filePath = path.join(__dirname, "../uploads", "temp_image.jpg"); // Ruta del archivo temporal
     fs.writeFileSync(filePath, buffer); // Escribe el buffer en un archivo
 
     // Configura las opciones del correo

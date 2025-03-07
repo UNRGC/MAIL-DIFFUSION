@@ -7,7 +7,7 @@ import { writeFileSync, existsSync, readFileSync } from "fs";
 config();
 
 // Función para crear un nuevo archivo .env con valores predeterminados si no existe
-export const envNew = () => {
+export const newEnv = () => {
     const envFilePath = ".env"; // Ruta del archivo .env
     if (!existsSync(envFilePath)) {
         // Verifica si el archivo .env no existe

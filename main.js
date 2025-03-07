@@ -24,14 +24,14 @@ function createWindow() {
             // skipcq: JS-S1020
             contextIsolation: false,
         },
-        icon: path.join(__dirname, "static", "icon.png"),
+        icon: path.join(__dirname, "assets", "icon.png"),
     });
 
     // Deshabilitar la barra de menú
     mainWindow.setMenu(null);
 
     // Cargar el HTML de la interfaz
-    mainWindow.loadFile("src/index.html");
+    mainWindow.loadFile("index.html");
 
     // Abre las herramientas de desarrollo
     //mainWindow.webContents.openDevTools();
@@ -41,7 +41,7 @@ app.whenReady().then(() => {
     createWindow();
 
     // Ejecutar tu API en un proceso hijo
-    const apiProcess = spawn("node", ["src/server.js"]); // Cambia la ruta a tu archivo server.js
+    const apiProcess = spawn("node", [path.join(__dirname, "api", "server.js")]);
 
     // Función para obtener la hora actual
     const getCurrentTime = () => {
@@ -53,13 +53,23 @@ app.whenReady().then(() => {
     // Capturar la salida de la API y enviarla a la ventana con la hora
     apiProcess.stdout.on("data", (data) => {
         const timestamp = getCurrentTime();
-        mainWindow.webContents.send("api-output", `[${timestamp}] ${data.toString()}`);
+        const messages = data.toString().split("\n");
+        messages.forEach((message) => {
+            if (message.trim() !== "") {
+                mainWindow.webContents.send("api-output", `[${timestamp}] ${message}`);
+            }
+        });
     });
 
     // Capturar los errores de la API y enviarlos a la ventana con la hora
     apiProcess.stderr.on("data", (data) => {
         const timestamp = getCurrentTime();
-        mainWindow.webContents.send("api-output", `[${timestamp}] Error: ${data.toString()}`);
+        const messages = data.toString().split("\n");
+        messages.forEach((message) => {
+            if (message.trim() !== "") {
+                mainWindow.webContents.send("api-output", `[${timestamp}] Error: ${message}`);
+            }
+        });
     });
 
     // Manejar el cierre de la ventana

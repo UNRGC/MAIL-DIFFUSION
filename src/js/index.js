@@ -1,7 +1,4 @@
-// Importa módulos necesarios
-const { ipcRenderer } = require("electron");
-const fs = require("fs");
-const path = require("path");
+import { getConnection, sendConnection, getAllEmailAddresses, sendMail, getTemplates } from "./api.js";
 
 // Obtiene referencias a elementos del DOM
 const connectionBtn = document.getElementById("connection");
@@ -13,11 +10,8 @@ const connectionSection = document.querySelector(".connection");
 const consoleSection = document.querySelector(".console");
 const diffusionSection = document.querySelector(".diffusion");
 const resultSection = document.querySelector(".result");
-const discardBtn = document.getElementById("discard");
-const saveBtn = document.getElementById("save");
-const advancedBtn = document.getElementById("advanced");
-const discardBtnDiffusion = document.getElementById("discardDiffusion");
 
+const formConnection = document.getElementById("formConnection");
 const instanceInput = document.getElementById("instance");
 const userInput = document.getElementById("user");
 const passInput = document.getElementById("pass");
@@ -30,14 +24,23 @@ const hostInput = document.getElementById("host");
 const organizationLabel = document.getElementById("organizationLabel");
 const organizationInput = document.getElementById("organization");
 
-const formDiffusion = document.getElementById("formDiffusion");
+const discardBtn = document.getElementById("discard");
+const saveBtn = document.getElementById("save");
+const advancedBtn = document.getElementById("advanced");
 
+const output = document.getElementById("output");
+const clearBtn = document.getElementById("clear");
+
+const formDiffusion = document.getElementById("formDiffusion");
 const affairInput = document.getElementById("affair");
 const messageInput = document.getElementById("message");
 const templateSelect = document.getElementById("template");
 const imageInput = document.getElementById("imageInput");
+const placeholderInput = document.getElementById("placeholder");
 const preview = document.getElementById("preview");
-const span = document.getElementById("placeholder");
+const cancelBtn = document.getElementById("cancel");
+
+const tbody = document.getElementById("tbody");
 const returnBtn = document.getElementById("return");
 
 let hash = window.location.hash || "#console";
@@ -84,56 +87,6 @@ const hashChange = () => {
     }
 };
 
-// Función para obtener la configuración de conexión desde el servidor
-const getConnection = async () => {
-    const response = await fetch("http://localhost:3000/env", {
-        mode: "cors",
-        method: "GET",
-        headers: {
-            "Content-Type": "application/json",
-        },
-    });
-    return response.json();
-};
-
-// Función para enviar la configuración de conexión al servidor
-const sendConnection = async (data) => {
-    const response = await fetch("http://localhost:3000/env", {
-        mode: "cors",
-        method: "POST",
-        headers: {
-            "Content-Type": "application/json",
-        },
-        body: JSON.stringify(data),
-    });
-    return response.json();
-};
-
-// Función para obtener todas las direcciones de correo electrónico desde el servidor
-const getAllEmailAddresses = async () => {
-    const response = await fetch("http://localhost:3000/email", {
-        mode: "cors",
-        method: "GET",
-        headers: {
-            "Content-Type": "application/json",
-        },
-    });
-    return response.json();
-};
-
-// Función para enviar un correo electrónico a través del servidor
-const sendMail = async (data) => {
-    const response = await fetch("http://localhost:3000/email/send", {
-        mode: "cors",
-        method: "POST",
-        headers: {
-            "Content-Type": "application/json",
-        },
-        body: JSON.stringify(data),
-    });
-    return response.json();
-};
-
 // Función para cargar la configuración de conexión en los campos del formulario
 const loadConnection = async () => {
     const envVariables = await getConnection();
@@ -151,17 +104,16 @@ const loadConnection = async () => {
     organizationInput.value = envVariables.ORGANIZATION;
 };
 
-// Escuchar la salida de la API desde el proceso principal
-ipcRenderer.on("api-output", (event, data) => {
-    const outputElement = document.getElementById("output");
-    const messageElement = document.createElement("div");
-    messageElement.textContent = data;
-    if (data.includes("Error:")) messageElement.classList.add("error");
-    else if (data.includes("Conectado") || data.includes("éxito")) messageElement.classList.add("success");
-    else if (data.includes("Creando")) messageElement.classList.add("warning");
+const loadTemplates = async () => {
+    const templates = await getTemplates();
 
-    outputElement.appendChild(messageElement);
-});
+    templates.forEach((template) => {
+        const option = document.createElement("option");
+        option.value = template.fileName;
+        option.textContent = template.fileName;
+        templateSelect.appendChild(option);
+    });
+};
 
 // Manejar cambios en el hash de la URL
 window.addEventListener("hashchange", () => {
@@ -169,7 +121,7 @@ window.addEventListener("hashchange", () => {
 });
 
 // Manejar el envío del formulario de conexión
-document.getElementById("formConnection").addEventListener("submit", async (event) => {
+formConnection.addEventListener("submit", async (event) => {
     event.preventDefault();
 
     const data = {
@@ -191,10 +143,10 @@ document.getElementById("formConnection").addEventListener("submit", async (even
             window.location.hash = "console";
         } else {
             window.location.hash = "console";
-            ipcRenderer.send("api-input", response.message);
+            // ipcRenderer.send("api-input", response.message);
         }
     } catch (error) {
-        ipcRenderer.send("api-input", error.message);
+        // ipcRenderer.send("api-input", error.message);
         console.debug(error);
     }
 });
@@ -203,7 +155,6 @@ document.getElementById("formConnection").addEventListener("submit", async (even
 formDiffusion.addEventListener("submit", async (event) => {
     event.preventDefault();
 
-    const table = document.getElementById("tbody");
     const formData = {
         affair: affairInput.value,
         message: messageInput.value,
@@ -218,7 +169,7 @@ formDiffusion.addEventListener("submit", async (event) => {
         const addresses = await getAllEmailAddresses();
         const uniqueEmails = new Set();
 
-        table.innerHTML = "";
+        tbody.innerHTML = "";
 
         addresses.forEach((address) => {
             const tr = document.createElement("tr");
@@ -240,18 +191,18 @@ formDiffusion.addEventListener("submit", async (event) => {
                 tr.appendChild(td1);
                 tr.appendChild(td2);
                 tr.appendChild(td3);
-                document.getElementById("tbody").appendChild(tr);
+                tbody.appendChild(tr);
             }
         });
     } catch (error) {
-        ipcRenderer.send("api-input", error.message);
+        // ipcRenderer.send("api-input", error.message);
         window.location.hash = "console";
         estado = "listo";
         return;
     }
 
     Promise.all(
-        Array.from(table.querySelectorAll("tr")).map(async (tr) => {
+        Array.from(tbody.querySelectorAll("tr")).map(async (tr) => {
             const tds = tr.querySelectorAll("td");
             const emails = tds[1].textContent;
             const status = tds[2];
@@ -270,7 +221,7 @@ formDiffusion.addEventListener("submit", async (event) => {
                     else status.textContent = "Error";
                 });
             } catch (error) {
-                ipcRenderer.send("api-input", error.message);
+                // ipcRenderer.send("api-input", error.message);
                 status.textContent = "Error";
             }
         })
@@ -336,30 +287,30 @@ advancedBtn.addEventListener("click", () => {
 });
 
 // Manejar el clic en el botón de descartar difusión
-discardBtnDiffusion.addEventListener("click", () => {
-    preview.src = "static/placeholder.png";
+cancelBtn.addEventListener("click", () => {
+    preview.src = "src/img/placeholder.png";
     preview.style.height = "46px";
-    span.classList.remove("hidden");
+    placeholderInput.classList.remove("hidden");
 });
 
 // Manejar el clic en el botón de retorno
 returnBtn.addEventListener("click", () => {
     estado = "listo";
     formDiffusion.reset();
-    preview.src = "static/placeholder.png";
+    preview.src = "src/img/placeholder.png";
     preview.style.height = "46px";
     window.location.hash = "diffusion";
     returnBtn.disabled = true;
 });
 
 // Manejar el clic en el botón de limpiar consola
-document.getElementById("clearConsole").addEventListener("click", () => {
-    document.getElementById("output").textContent = "";
+clearBtn.addEventListener("click", () => {
+    output.textContent = "";
 });
 
 // Manejar el clic en la vista previa de la imagen
 preview.addEventListener("click", () => imageInput.click());
-span.addEventListener("click", () => imageInput.click());
+placeholderInput.addEventListener("click", () => imageInput.click());
 
 // Manejar el cambio de archivo de imagen
 imageInput.addEventListener("change", (event) => {
@@ -368,7 +319,7 @@ imageInput.addEventListener("change", (event) => {
         const reader = new FileReader();
         reader.onload = (e) => (preview.src = e.target.result);
         reader.readAsDataURL(file);
-        span.classList.add("hidden");
+        placeholderInput.classList.add("hidden");
         preview.style.height = "auto";
     }
 });
@@ -377,24 +328,10 @@ imageInput.addEventListener("change", (event) => {
 window.location.hash = hash;
 hashChange();
 
-// Función para cargar archivos HTML en el selector de plantillas
-const loadHtmlFiles = () => {
-    const directoryPath = path.join(__dirname, "static");
-    fs.readdir(directoryPath, (err, files) => {
-        if (err) {
-            console.error("No se pudo leer el directorio:", err);
-            return;
-        }
-        const htmlFiles = files.filter((file) => path.extname(file) === ".html");
-        htmlFiles.forEach((file) => {
-            const option = document.createElement("option");
-            option.value = file;
-            option.textContent = file;
-            templateSelect.appendChild(option);
-        });
-    });
-};
-
 // Cargar la configuración de conexión y los archivos HTML
 loadConnection();
-loadHtmlFiles();
+loadTemplates();
+
+// document.addEventListener("DOMContentLoaded", (event) => {
+//    console.log("DOM fully loaded and parsed");
+// });

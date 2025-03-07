@@ -17,7 +17,7 @@ export const sendMailHandler = async (req, res) => {
         const { addressee, affair, message, template, image } = req.body;
 
         // Construye la ruta al archivo de plantilla HTML
-        const templatePath = path.join(__dirname, "../static", template);
+        const templatePath = path.join(__dirname, "../templates", template);
 
         let html = "";
 

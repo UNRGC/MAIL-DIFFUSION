@@ -3,17 +3,17 @@
     <head>
         <meta charset="UTF-8" />
         <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-        <link rel="icon" href="static/icon.png" />
+        <link rel="icon" href="src/img/icon.png" />
         <title>OmniMail</title>
         <!-- Iconos de bootstrap -->
         <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.3/font/bootstrap-icons.min.css" />
-        <link rel="stylesheet" href="static/index.css" />
+        <link rel="stylesheet" href="src/css/index.css" />
         <meta http-equiv="Content-Security-Policy" content="script-src 'self' 'unsafe-inline';" />
     </head>
     <body>
         <main>
             <nav>
-                <img src="static/logo.png" alt="Logo" width="120" />
+                <img src="src/img/logo.png" alt="Logo" width="120" />
                 <div>
                     <a href="#connection" id="connection"><i class="bi bi-boxes"></i> Conexión</a>
                     <a href="#console" class="active" id="console"><i class="bi bi-terminal"></i> Consola</a>
@@ -25,7 +25,7 @@
                 </div>
             </nav>
             <section>
-                <form class="connection" id="formConnection">
+                <form class="connection hidden" id="formConnection">
                     <div class="connection-col">
                         <p><i class="bi bi-database"></i> Conexión con la base de datos</p>
                         <label for="instance">Instancia:</label>
@@ -56,10 +56,10 @@
                         <button type="submit" id="save" disabled><i class="bi bi-floppy"></i> Guardar</button>
                     </div>
                 </form>
-                <article class="console hidden">
+                <article class="console">
                     <p><i class="bi bi-terminal"></i> Salida del servidor</p>
                     <pre id="output"></pre>
-                    <button id="clearConsole"><i class="bi bi-arrow-repeat"></i> Limpiar consola</button>
+                    <button id="clear"><i class="bi bi-arrow-repeat"></i> Limpiar consola</button>
                 </article>
                 <form class="diffusion hidden" id="formDiffusion">
                     <div class="diffusion-col">
@@ -79,11 +79,11 @@
                         <input type="file" id="imageInput" name="file" accept="image/*" />
                         <div class="image">
                             <span id="placeholder"><i class="bi bi-image"></i> Selecciona una imagen</span>
-                            <img id="preview" src="static/placeholder.png" alt="Selecciona una imagen" />
+                            <img id="preview" src="src/img/placeholder.png" alt="Selecciona una imagen" />
                         </div>
                     </div>
                     <div class="input-group">
-                        <button type="reset" id="discardDiffusion"><i class="bi bi-trash"></i> Descartar</button>
+                        <button type="reset" id="cancel"><i class="bi bi-trash"></i> Descartar</button>
                         <button type="submit"><i class="bi bi-envelope"></i> Enviar</button>
                     </div>
                 </form>
@@ -107,6 +107,7 @@
             </section>
         </main>
 
-        <script src="static/index.js"></script>
+        <script src="src/js/ipcRenderer.js"></script>
+        <script src="src/js/index.js" type="module"></script>
     </body>
 </html>

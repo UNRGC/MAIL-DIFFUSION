@@ -1,3 +1,22 @@
+import { readdir } from "fs/promises";
+import { existsSync, writeFileSync, mkdirSync } from "fs";
+import path from "path";
+import { fileURLToPath } from "url";
+
+const __filename = fileURLToPath(import.meta.url);
+const __dirname = path.dirname(__filename);
+
+export const newTemplate = () => {
+    try {
+        const folderPath = path.join(__dirname, "../templates");
+        const templatePath = path.join(folderPath, "Plantilla1.html");
+        let content = null;
+
+        // Crear la carpeta si no existe
+        if (!existsSync(folderPath)) mkdirSync(folderPath);
+
+        if (!existsSync(templatePath)) {
+            content = `
 <!DOCTYPE html>
 <html lang="es">
     <head>
@@ -16,7 +35,6 @@
                 margin-top: 2rem;
             }
             p {
-                color: #eeeeee;
                 text-align: center;
                 margin: 2rem 0;
                 font-size: large;
@@ -27,7 +45,6 @@
                 width: 95%;
             }
             a {
-                color: #eeeeee;
                 margin: 0;
                 font-size: large;
                 font-weight: bold;
@@ -70,3 +87,34 @@
         </p>
     </body>
 </html>
+`;
+
+            // Crear el archivo con el contenido básico
+            writeFileSync(templatePath, content, "utf8");
+            console.debug("Plantilla creada con éxito");
+        } else console.debug("Plantillas cargadas con éxito");
+    } catch (error) {
+        console.error("Error al crear la plantilla", error.message);
+    }
+};
+
+export const getTemplates = async () => {
+    try {
+        const folderPath = path.join(__dirname, "../templates");
+        if (!existsSync(folderPath)) {
+            throw new Error("La carpeta de plantillas no existe");
+        }
+
+        const files = (await readdir(folderPath)).filter((file) => file.endsWith(".html"));
+        const templates = await Promise.all(
+            files.map((file) => {
+                return { fileName: file };
+            })
+        );
+
+        return JSON.stringify(templates);
+    } catch (error) {
+        console.error("Error al obtener las plantillas", error.message);
+        return JSON.stringify({ error: error.message });
+    }
+};
